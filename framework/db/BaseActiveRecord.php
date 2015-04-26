@@ -237,8 +237,6 @@ abstract class BaseActiveRecord extends Model implements ActiveRecordInterface
     {
         if (isset($this->_attributes[$name]) || array_key_exists($name, $this->_attributes)) {
             return $this->_attributes[$name];
-        } elseif ($this->hasAttribute($name)) {
-            return null;
         } else {
             if (isset($this->_related[$name]) || array_key_exists($name, $this->_related)) {
                 return $this->_related[$name];
@@ -828,6 +826,11 @@ abstract class BaseActiveRecord extends Model implements ActiveRecordInterface
     public function init()
     {
         parent::init();
+
+        foreach ($this->attributes() as $attribute) {
+            $this->_attributes[$attribute] = null;
+        }
+        
         $this->trigger(self::EVENT_INIT);
     }
 
@@ -1047,6 +1050,7 @@ abstract class BaseActiveRecord extends Model implements ActiveRecordInterface
     public static function populateRecord($record, $row)
     {
         $columns = array_flip($record->attributes());
+        
         foreach ($row as $name => $value) {
             if (isset($columns[$name])) {
                 $record->_attributes[$name] = $value;
@@ -1054,6 +1058,7 @@ abstract class BaseActiveRecord extends Model implements ActiveRecordInterface
                 $record->$name = $value;
             }
         }
+
         $record->_oldAttributes = $record->_attributes;
     }
 
